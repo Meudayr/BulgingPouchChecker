@@ -5,7 +5,38 @@ frame:RegisterEvent("ADDON_LOADED")
 frame:RegisterEvent("TRANSMOG_COLLECTION_UPDATED")
 
 -- ============================================================
--- CanIMogIt-style Transmog Check (Includes Shared Appearance Sources)
+-- Slash commands (Registered Early)
+-- ============================================================
+SLASH_BULGINGPOUCHCHECKER1 = "/bpc"
+SLASH_BULGINGPOUCHCHECKER2 = "/pouch"
+SLASH_BULGINGPOUCHCHECKER3 = "/pouchcheck"
+SLASH_BULGINGPOUCHCHECKER4 = "/bulgingpouch"
+
+SlashCmdList["BULGINGPOUCHCHECKER"] = function(msg)
+    local ok, err = pcall(function()
+        local cmd = string.lower(string.match(msg or "", "^%s*(.-)%s*$") or "")
+
+        if cmd == "summary" or cmd == "sum" then
+            BPC.PrintSummary()
+        elseif cmd == "help" then
+            print("|cff00ccff[Bulging Pouch Checker]|r Commands:")
+            print("  /bpc — Toggle main window")
+            print("  /bpc summary — Print collection summary to chat")
+        else
+            if BPC.ToggleUI then
+                BPC.ToggleUI()
+            elseif BPC.PrintSummary then
+                BPC.PrintSummary()
+            end
+        end
+    end)
+    if not ok then
+        print("|cffff4444[BPC Error]|r Command failed: " .. tostring(err))
+    end
+end
+
+-- ============================================================
+-- CanIMogIt-style Transmog Check
 -- ============================================================
 function BPC.PlayerHasTransmog(item)
     if not item then return false end
@@ -156,32 +187,5 @@ end)
 function BULGINGPOUCHCHECKER_OnCompartmentClick()
     if BPC.ToggleUI then
         BPC.ToggleUI()
-    end
-end
-
--- ============================================================
--- Slash commands
--- ============================================================
-SLASH_BULGINGPOUCHCHECKER1 = "/bpc"
-SLASH_BULGINGPOUCHCHECKER2 = "/pouch"
-SLASH_BULGINGPOUCHCHECKER3 = "/pouchcheck"
-SLASH_BULGINGPOUCHCHECKER4 = "/bulgingpouch"
-
-SlashCmdList["BULGINGPOUCHCHECKER"] = function(msg)
-    local ok, err = pcall(function()
-        local cmd = string.lower(string.match(msg or "", "^%s*(.-)%s*$") or "")
-
-        if cmd == "summary" or cmd == "sum" then
-            BPC.PrintSummary()
-        else
-            if BPC.ToggleUI then
-                BPC.ToggleUI()
-            else
-                BPC.PrintSummary()
-            end
-        end
-    end)
-    if not ok then
-        print("|cffff4444[BPC Error]|r Command failed: " .. tostring(err))
     end
 end

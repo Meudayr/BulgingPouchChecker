@@ -3,7 +3,10 @@ name: Package and Release Addon
 on:
   push:
     tags:
-      - '*' # Triggers whenever you push a git tag (e.g. 1.0.0 or v1.0.0)
+      - '*'
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   release:

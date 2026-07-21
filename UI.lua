@@ -362,11 +362,27 @@ function BPC.UpdateUI()
             row.statusText = statusText
 
             row:EnableMouse(true)
+            row:SetScript("OnMouseDown", function(s, button)
+                if button == "LeftButton" and IsControlKeyDown() then
+                    if s.sourceID and DressUpItemModifiedAppearance then
+                        DressUpItemModifiedAppearance(s.sourceID)
+                    elseif s.itemID then
+                        local itemLink = "item:" .. s.itemID
+                        if DressUpItemLink then
+                            DressUpItemLink(itemLink)
+                        elseif DressUpLink then
+                            DressUpLink(itemLink)
+                        end
+                    end
+                end
+            end)
             row:SetScript("OnEnter", function(s)
                 s:SetBackdropColor(0.2, 0.25, 0.35, 0.8)
                 if s.itemID then
                     GameTooltip:SetOwner(s, "ANCHOR_RIGHT")
                     GameTooltip:SetItemByID(s.itemID)
+                    GameTooltip:AddLine(" ")
+                    GameTooltip:AddLine("|cff00ccffCtrl-Click|r to preview appearance", 0.5, 0.8, 1)
                     GameTooltip:Show()
                 else
                     GameTooltip:SetOwner(s, "ANCHOR_RIGHT")
@@ -386,6 +402,7 @@ function BPC.UpdateUI()
         row.rowIndex = i
         row.itemName = entry.item.name
         row.itemID   = entry.item.itemID
+        row.sourceID = entry.item.sourceID
         row:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 0, rowY)
         row:SetPoint("TOPRIGHT", scrollChild, "TOPRIGHT", 0, rowY)
 

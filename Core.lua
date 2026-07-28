@@ -141,6 +141,67 @@ function BPC.PrintSummary()
 end
 
 -- ============================================================
+-- Auctionator Export & Missing Items Helper
+-- ============================================================
+function BPC.GetMissingItems(containerId)
+    local missing = {}
+    if containerId == "all" or not containerId then
+        local grand = BPC.AnalyzeAll()
+        for _, container in ipairs(BPC.Containers) do
+            local res = grand.containers[container.id]
+            if res and res.itemsStatus then
+                for _, entry in ipairs(res.itemsStatus) do
+                    if not entry.isCollected then
+                        table.insert(missing, entry.item.name)
+                    end
+                end
+            end
+        end
+    else
+        local container = BPC.ContainerMap[containerId]
+        if container then
+            local res = BPC.AnalyzeContainer(container)
+            if res and res.itemsStatus then
+                for _, entry in ipairs(res.itemsStatus) do
+                    if not entry.isCollected then
+                        table.insert(missing, entry.item.name)
+                    end
+                end
+            end
+        end
+    end
+    return missing
+end
+
+function BPC.ExportToAuctionator(containerId)
+    local missingNames = BPC.GetMissingItems(containerId)
+    if #missingNames == 0 then
+        print("|cff00ccff[Bulging Pouch Checker]|r No missing items to export for this view!")
+        return
+    end
+
+    local listName = "BPC: All Missing"
+    if containerId ~= "all" and BPC.ContainerMap[containerId] then
+        listName = "BPC: " .. BPC.ContainerMap[containerId].name
+    end
+
+    local auctionatorCreated = false
+    if Auctionator and Auctionator.API and Auctionator.API.v1 and Auctionator.API.v1.CreateShoppingList then
+        local ok, err = pcall(Auctionator.API.v1.CreateShoppingList, "BulgingPouchChecker", listName, missingNames)
+        if ok then
+            auctionatorCreated = true
+            print(string.format("|cff00ccff[Bulging Pouch Checker]|r Created Auctionator shopping list |cffffcc00\"%s\"|r with %d missing item(s)!", listName, #missingNames))
+        else
+            print("|cffff4444[BPC Error]|r Auctionator export failed: " .. tostring(err))
+        end
+    end
+
+    if BPC.ShowExportDialog then
+        BPC.ShowExportDialog(listName, missingNames, auctionatorCreated)
+    end
+end
+
+-- ============================================================
 -- Tooltip Integration for Pouch Items in Bags/Vendors
 -- ============================================================
 if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall then

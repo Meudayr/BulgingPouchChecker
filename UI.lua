@@ -1,6 +1,7 @@
 local addonName, BPC = ...
 
 local mainFrame = nil
+local exportDialog = nil
 local selectedContainerId = "all"
 local currentFilter = "all" -- "all", "missing", "collected"
 
@@ -16,6 +17,124 @@ local function GetQualityColor(q)
     return QualityColors[q] or "|cffffffff"
 end
 
+-- ============================================================
+-- Export Popup Dialog Window
+-- ============================================================
+function BPC.ShowExportDialog(listName, missingNames, auctionatorCreated)
+    if not exportDialog then
+        exportDialog = CreateFrame("Frame", "BulgingPouchCheckerExportDialog", UIParent, "BackdropTemplate")
+        exportDialog:SetSize(480, 320)
+        exportDialog:SetPoint("CENTER")
+        exportDialog:SetMovable(true)
+        exportDialog:EnableMouse(true)
+        exportDialog:RegisterForDrag("LeftButton")
+        exportDialog:SetScript("OnDragStart", exportDialog.StartMoving)
+        exportDialog:SetScript("OnDragStop", exportDialog.StopMovingOrSizing)
+        exportDialog:SetClampedToScreen(true)
+        exportDialog:SetFrameStrata("DIALOG")
+        tinsert(UISpecialFrames, "BulgingPouchCheckerExportDialog")
+
+        exportDialog:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8x8",
+            edgeFile = "Interface\\Buttons\\WHITE8x8",
+            tile = false, tileSize = 0, edgeSize = 2,
+            insets = { left = 2, right = 2, top = 2, bottom = 2 }
+        })
+        exportDialog:SetBackdropColor(0.08, 0.09, 0.12, 0.98)
+        exportDialog:SetBackdropBorderColor(0.0, 0.7, 0.9, 1.0)
+
+        -- Header Bar
+        local header = CreateFrame("Frame", nil, exportDialog, "BackdropTemplate")
+        header:SetPoint("TOPLEFT", exportDialog, "TOPLEFT", 4, -4)
+        header:SetPoint("TOPRIGHT", exportDialog, "TOPRIGHT", -4, -4)
+        header:SetHeight(34)
+        header:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8x8",
+            edgeFile = "Interface\\Buttons\\WHITE8x8",
+            tile = false, tileSize = 0, edgeSize = 1,
+            insets = { left = 0, right = 0, top = 0, bottom = 0 }
+        })
+        header:SetBackdropColor(0.12, 0.14, 0.18, 1)
+        header:SetBackdropBorderColor(0.2, 0.25, 0.3, 0.5)
+
+        local title = header:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        title:SetPoint("LEFT", header, "LEFT", 12, 0)
+        exportDialog.titleText = title
+
+        local closeBtn = CreateFrame("Button", nil, header, "UIPanelCloseButton")
+        closeBtn:SetPoint("RIGHT", header, "RIGHT", -4, 0)
+        closeBtn:SetScript("OnClick", function()
+            exportDialog:Hide()
+        end)
+
+        -- Subtitle Status Text
+        local statusMsg = exportDialog:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        statusMsg:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 12, -8)
+        statusMsg:SetPoint("TOPRIGHT", header, "BOTTOMRIGHT", -12, -8)
+        statusMsg:SetJustifyH("LEFT")
+        exportDialog.statusMsg = statusMsg
+
+        -- ScrollFrame for EditBox
+        local scrollFrame = CreateFrame("ScrollFrame", "BPCExportScrollFrame", exportDialog, "UIPanelScrollFrameTemplate")
+        scrollFrame:SetPoint("TOPLEFT", statusMsg, "BOTTOMLEFT", 0, -8)
+        scrollFrame:SetPoint("BOTTOMRIGHT", exportDialog, "BOTTOMRIGHT", -30, 42)
+
+        local editBox = CreateFrame("EditBox", nil, scrollFrame)
+        editBox:SetMultiLine(true)
+        editBox:SetMaxLetters(0)
+        editBox:SetFontObject("GameFontHighlightSmall")
+        editBox:SetWidth(415)
+        editBox:SetAutoFocus(false)
+        editBox:SetScript("OnEscapePressed", function()
+            exportDialog:Hide()
+        end)
+        scrollFrame:SetScrollChild(editBox)
+        exportDialog.editBox = editBox
+
+        -- Bottom Note
+        local bottomNote = exportDialog:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+        bottomNote:SetPoint("BOTTOMLEFT", exportDialog, "BOTTOMLEFT", 12, 14)
+        bottomNote:SetText("Press Ctrl+C to copy item list")
+
+        -- Done Button
+        local doneBtn = CreateFrame("Button", nil, exportDialog, "BackdropTemplate")
+        doneBtn:SetSize(80, 22)
+        doneBtn:SetPoint("BOTTOMRIGHT", exportDialog, "BOTTOMRIGHT", -12, 10)
+        doneBtn:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8x8",
+            edgeFile = "Interface\\Buttons\\WHITE8x8",
+            tile = false, tileSize = 0, edgeSize = 1,
+            insets = { left = 0, right = 0, top = 0, bottom = 0 }
+        })
+        doneBtn:SetBackdropColor(0.15, 0.17, 0.22, 0.8)
+        doneBtn:SetBackdropBorderColor(0.25, 0.3, 0.38, 0.5)
+
+        local doneText = doneBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        doneText:SetPoint("CENTER", doneBtn, "CENTER", 0, 0)
+        doneText:SetText("Close")
+
+        doneBtn:SetScript("OnClick", function()
+            exportDialog:Hide()
+        end)
+    end
+
+    exportDialog.titleText:SetText("|cff00ccffExport Missing Items|r — " .. listName)
+    if auctionatorCreated then
+        exportDialog.statusMsg:SetText("|cff00ff00✓ Shopping list created in Auctionator: \"" .. listName .. "\"|r\nItem list available below to copy:")
+    else
+        exportDialog.statusMsg:SetText("|cffffcc00Missing items list (" .. #missingNames .. " items)|r — Copy & paste into Auctionator:")
+    end
+
+    local textContent = table.concat(missingNames, "\n")
+    exportDialog.editBox:SetText(textContent)
+    exportDialog:Show()
+    exportDialog.editBox:SetFocus()
+    exportDialog.editBox:HighlightText()
+end
+
+-- ============================================================
+-- Main UI Creation
+-- ============================================================
 function BPC.CreateUI()
     if mainFrame then return mainFrame end
 
@@ -211,6 +330,44 @@ function BPC.CreateUI()
     end
     mainFrame.filterButtons = filterButtons
 
+    -- Export to Auctionator Button
+    local exportBtn = CreateFrame("Button", nil, content, "BackdropTemplate")
+    exportBtn:SetSize(150, 24)
+    exportBtn:SetPoint("TOPRIGHT", infoBox, "BOTTOMRIGHT", 0, -6)
+    exportBtn:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8x8",
+        edgeFile = "Interface\\Buttons\\WHITE8x8",
+        tile = false, tileSize = 0, edgeSize = 1,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    })
+    exportBtn:SetBackdropColor(0.15, 0.17, 0.22, 0.8)
+    exportBtn:SetBackdropBorderColor(0.25, 0.3, 0.38, 0.5)
+
+    local exportText = exportBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    exportText:SetPoint("CENTER", exportBtn, "CENTER", 0, 0)
+    exportText:SetText("|cff00ccffExport Auctionator|r")
+    exportBtn.text = exportText
+
+    exportBtn:SetScript("OnEnter", function(s)
+        s:SetBackdropColor(0.2, 0.35, 0.5, 0.9)
+        s:SetBackdropBorderColor(0.0, 0.8, 1.0, 1)
+        GameTooltip:SetOwner(s, "ANCHOR_RIGHT")
+        GameTooltip:SetText("Export Missing Items", 1, 1, 1)
+        GameTooltip:AddLine("Exports missing items for this container view into an Auctionator shopping list.", 0.8, 0.8, 0.8, true)
+        GameTooltip:Show()
+    end)
+    exportBtn:SetScript("OnLeave", function(s)
+        s:SetBackdropColor(0.15, 0.17, 0.22, 0.8)
+        s:SetBackdropBorderColor(0.25, 0.3, 0.38, 0.5)
+        GameTooltip:Hide()
+    end)
+    exportBtn:SetScript("OnClick", function()
+        if BPC.ExportToAuctionator then
+            BPC.ExportToAuctionator(selectedContainerId)
+        end
+    end)
+    mainFrame.exportBtn = exportBtn
+
     -- Scroll Frame for Items List
     local scrollFrame = CreateFrame("ScrollFrame", "BulgingPouchCheckerScrollFrame", content, "UIPanelScrollFrameTemplate")
     scrollFrame:SetPoint("TOPLEFT", infoBox, "BOTTOMLEFT", 0, -36)
@@ -363,15 +520,71 @@ function BPC.UpdateUI()
 
             row:EnableMouse(true)
             row:SetScript("OnMouseDown", function(s, button)
-                if button == "LeftButton" and IsControlKeyDown() then
-                    if s.sourceID and DressUpItemModifiedAppearance then
-                        DressUpItemModifiedAppearance(s.sourceID)
-                    elseif s.itemID then
-                        local itemLink = "item:" .. s.itemID
-                        if DressUpItemLink then
-                            DressUpItemLink(itemLink)
-                        elseif DressUpLink then
-                            DressUpLink(itemLink)
+                if button == "LeftButton" then
+                    if IsControlKeyDown() then
+                        -- Ctrl-Click: Wardrobe Dressing Room preview
+                        if s.sourceID and DressUpItemModifiedAppearance then
+                            DressUpItemModifiedAppearance(s.sourceID)
+                        elseif s.itemID then
+                            local itemLink = "item:" .. s.itemID
+                            if DressUpItemLink then
+                                DressUpItemLink(itemLink)
+                            elseif DressUpLink then
+                                DressUpLink(itemLink)
+                            end
+                        end
+                    elseif IsShiftKeyDown() then
+                        -- Shift-Click: Fill into Auction House search bar or Chat EditBox
+                        local itemName = s.itemName
+                        if not itemName then return end
+
+                        local searched = false
+
+                        -- Auction House Frame SearchBar
+                        if AuctionHouseFrame and AuctionHouseFrame:IsShown() then
+                            if AuctionHouseFrame.SearchBar and AuctionHouseFrame.SearchBar.SearchBox then
+                                AuctionHouseFrame.SearchBar.SearchBox:SetText(itemName)
+                                AuctionHouseFrame.SearchBar.SearchBox:SetFocus()
+                                if AuctionHouseFrame.SearchBar.SearchButton and AuctionHouseFrame.SearchBar.SearchButton:IsEnabled() then
+                                    AuctionHouseFrame.SearchBar.SearchButton:Click()
+                                elseif AuctionHouseFrame.SearchBar.StartSearch then
+                                    AuctionHouseFrame.SearchBar:StartSearch()
+                                end
+                                searched = true
+                            end
+                        end
+
+                        -- Chat EditBox
+                        if not searched and ChatEdit_GetActiveWindow() then
+                            local itemLink = nil
+                            if s.itemID then
+                                if C_Item and C_Item.GetItemLinkByID then
+                                    itemLink = C_Item.GetItemLinkByID(s.itemID)
+                                end
+                                if not itemLink and C_Item and C_Item.GetItemInfo then
+                                    itemLink = select(2, C_Item.GetItemInfo(s.itemID))
+                                end
+                                if not itemLink and GetItemInfo then
+                                    itemLink = select(2, GetItemInfo(s.itemID))
+                                end
+                                if not itemLink and s.itemName then
+                                    local qualityHex = "ff0070dd"
+                                    if ITEM_QUALITY_COLORS and s.quality and ITEM_QUALITY_COLORS[s.quality] then
+                                        qualityHex = ITEM_QUALITY_COLORS[s.quality].color:GenerateHexColor()
+                                    elseif QualityColors and s.quality and QualityColors[s.quality] then
+                                        qualityHex = QualityColors[s.quality]:gsub("|c", "")
+                                    end
+                                    itemLink = string.format("|c%s|Hitem:%d:0:0:0:0:0:0:0:0:0:0:0:0:0|h[%s]|h|r", qualityHex, s.itemID, s.itemName)
+                                end
+                            end
+                            if not itemLink then itemLink = s.itemName or "" end
+
+                            ChatEdit_InsertLink(itemLink)
+                            searched = true
+                        end
+
+                        if not searched then
+                            print("|cff00ccff[Bulging Pouch Checker]|r Open the Auction House to search for: |cffffcc00" .. itemName .. "|r")
                         end
                     end
                 end
@@ -382,7 +595,7 @@ function BPC.UpdateUI()
                     GameTooltip:SetOwner(s, "ANCHOR_RIGHT")
                     GameTooltip:SetItemByID(s.itemID)
                     GameTooltip:AddLine(" ")
-                    GameTooltip:AddLine("|cff00ccffCtrl-Click|r to preview appearance", 0.5, 0.8, 1)
+                    GameTooltip:AddLine("|cff00ccffCtrl-Click|r preview  |  |cff00ccffShift-Click|r AH search / Chat link", 0.5, 0.8, 1)
                     GameTooltip:Show()
                 else
                     GameTooltip:SetOwner(s, "ANCHOR_RIGHT")
@@ -403,6 +616,7 @@ function BPC.UpdateUI()
         row.itemName = entry.item.name
         row.itemID   = entry.item.itemID
         row.sourceID = entry.item.sourceID
+        row.quality  = entry.item.quality
         row:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 0, rowY)
         row:SetPoint("TOPRIGHT", scrollChild, "TOPRIGHT", 0, rowY)
 
@@ -410,7 +624,7 @@ function BPC.UpdateUI()
         row:SetBackdropColor(bg, bg, bg + 0.03, 0.8)
         row:SetBackdropBorderColor(0.2, 0.22, 0.28, 0.3)
 
-        -- Icon rendering: exact WoW game icon ID directly from Data.lua!
+        -- Icon rendering
         local iconTex = entry.item.icon or 134400
         row.icon:SetTexture(iconTex)
 
@@ -449,4 +663,3 @@ function BPC.ToggleUI()
         print("|cffff4444[BPC Error]|r ToggleUI failed: " .. tostring(err))
     end
 end
-

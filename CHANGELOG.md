@@ -1,6 +1,6 @@
-# Bulging Pouch Checker v1.3.0 Release Notes
+# Bulging Pouch Checker v1.4.0 Release Notes
 
-- **Auctionator Export**: Added an "Export Auctionator" button to automatically create or update an Auctionator shopping list with your missing items, along with a copyable text window.
-- **Auction House Search**: Shift-clicking any item row while the Auction House is open populates its name into the search bar and runs the search.
-- **Chat Link Support**: Shift-clicking an item row while the chat window is open now inserts a full, clickable item link with the item name.
-- **Tooltip Hints**: Added shortcut descriptions to item tooltips for Ctrl-Click preview and Shift-Click search/link functions.
+- **Pouch Expected Value**: Header now displays the calculated Expected Value (EV) per pouch opened based on Auctionator/TSM auction house price data.
+- **AH Price Column**: Added a price column to the item list displaying the current market price for each individual cosmetic item.
+- **Tooltip Pricing Integration**: Pouch tooltips in bags and at vendors now display the calculated Expected Value per pouch opened.
+- **Pricing Data Fallback**: Supports Auctionator API and database queries, with fallback to TSM market pricing data if present.

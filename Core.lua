@@ -202,6 +202,101 @@ function BPC.ExportToAuctionator(containerId)
 end
 
 -- ============================================================
+-- Auction Price & Expected Value Helpers
+-- ============================================================
+function BPC.FormatMoney(copper)
+    if not copper or copper <= 0 then return "|cff888888-|r" end
+    local gold = math.floor(copper / 10000)
+    local silver = math.floor((copper % 10000) / 100)
+    if gold > 0 then
+        if BreakUpLargeNumbers then
+            return string.format("|cffffd700%s|rg", BreakUpLargeNumbers(gold))
+        else
+            return string.format("|cffffd700%d|rg", gold)
+        end
+    elseif silver > 0 then
+        return string.format("|cffc7c7cf%d|rs", silver)
+    else
+        return string.format("|cffa0522d%d|rc", copper % 100)
+    end
+end
+
+function BPC.GetItemAHPrice(itemID)
+    if not itemID then return nil end
+
+    if Auctionator and Auctionator.API and Auctionator.API.v1 and Auctionator.API.v1.GetAuctionPriceByItemID then
+        local ok, price = pcall(Auctionator.API.v1.GetAuctionPriceByItemID, "BulgingPouchChecker", itemID)
+        if ok and price and price > 0 then return price end
+    end
+
+    if Auctionator and Auctionator.Database and Auctionator.Database.GetPrice then
+        local ok, price = pcall(Auctionator.Database.GetPrice, Auctionator.Database, tostring(itemID))
+        if ok and price and price > 0 then return price end
+    end
+
+    if TSM_API and TSM_API.GetCustomPriceValue then
+        local ok, price = pcall(TSM_API.GetCustomPriceValue, "dbmarket", "i:" .. itemID)
+        if ok and price and price > 0 then return price end
+    end
+
+    return nil
+end
+
+function BPC.GetContainerPricing(container)
+    if not container or not container.items then
+        return { ev = 0, totalVal = 0, missingVal = 0, pricedCount = 0, totalItems = 0 }
+    end
+
+    local totalPrice = 0
+    local missingPrice = 0
+    local pricedCount = 0
+    local totalItems = #container.items
+
+    for _, item in ipairs(container.items) do
+        local price = BPC.GetItemAHPrice(item.itemID)
+        if price and price > 0 then
+            totalPrice = totalPrice + price
+            pricedCount = pricedCount + 1
+
+            local hasMog = BPC.PlayerHasTransmog(item)
+            if not hasMog then
+                missingPrice = missingPrice + price
+            end
+        end
+    end
+
+    local ev = (totalItems > 0 and pricedCount > 0) and math.floor(totalPrice / totalItems) or 0
+    return {
+        ev = ev,
+        totalVal = totalPrice,
+        missingVal = missingPrice,
+        pricedCount = pricedCount,
+        totalItems = totalItems
+    }
+end
+
+function BPC.GetAllContainersPricing()
+    local grandEV, grandTotalVal, grandMissingVal = 0, 0, 0
+    local totalContainers = #BPC.Containers
+
+    for _, container in ipairs(BPC.Containers) do
+        local pricing = BPC.GetContainerPricing(container)
+        if pricing.ev > 0 then
+            grandEV = grandEV + pricing.ev
+        end
+        grandTotalVal = grandTotalVal + pricing.totalVal
+        grandMissingVal = grandMissingVal + pricing.missingVal
+    end
+
+    local avgEV = (totalContainers > 0) and math.floor(grandEV / totalContainers) or 0
+    return {
+        ev = avgEV,
+        totalVal = grandTotalVal,
+        missingVal = grandMissingVal
+    }
+end
+
+-- ============================================================
 -- Tooltip Integration for Pouch Items in Bags/Vendors
 -- ============================================================
 if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall then
@@ -215,10 +310,16 @@ if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall then
         for cKey, cData in pairs(BPC.ContainerNameMap) do
             if cleanName:find(cKey, 1, true) then
                 local res = BPC.AnalyzeContainer(cData)
+                local pricing = BPC.GetContainerPricing(cData)
                 tooltip:AddLine(" ")
                 tooltip:AddLine("|cff00ccffBulging Pouch Checker|r")
                 local pc = res.missing == 0 and "|cff00ff00" or "|cffffcc00"
                 tooltip:AddDoubleLine("Progress:", string.format("%s%d/%d (%d%%)|r", pc, res.collected, res.total, res.percent))
+
+                if pricing and pricing.ev > 0 then
+                    tooltip:AddDoubleLine("Expected Value:", BPC.FormatMoney(pricing.ev) .. " / pouch")
+                end
+
                 if res.missing > 0 then
                     tooltip:AddLine("|cff888888/bpc to view full list|r")
                 else

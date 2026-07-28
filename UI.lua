@@ -273,6 +273,11 @@ function BPC.CreateUI()
     infoSub:SetPoint("TOPLEFT", infoTitle, "BOTTOMLEFT", 0, -4)
     infoBox.sub = infoSub
 
+    local infoPricing = infoBox:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    infoPricing:SetPoint("TOPRIGHT", infoBox, "TOPRIGHT", -12, -8)
+    infoPricing:SetJustifyH("RIGHT")
+    infoBox.pricing = infoPricing
+
     -- Progress Bar
     local pBar = CreateFrame("StatusBar", nil, infoBox)
     pBar:SetSize(490, 16)
@@ -420,6 +425,13 @@ function BPC.UpdateUI()
         mainFrame.infoBox.title:SetText("All Containers Overview")
         mainFrame.infoBox.sub:SetText("Analyzing 6 containers from Silvermoon City & Umbral Base Camp")
 
+        local grandPricing = BPC.GetAllContainersPricing and BPC.GetAllContainersPricing()
+        if grandPricing and grandPricing.ev > 0 then
+            mainFrame.infoBox.pricing:SetText(string.format("|cffffcc00Expected Value:|r %s / pouch", BPC.FormatMoney(grandPricing.ev)))
+        else
+            mainFrame.infoBox.pricing:SetText("|cff888888AH Pricing: Scan with Auctionator|r")
+        end
+
         for _, container in ipairs(BPC.Containers) do
             local res = grand.containers[container.id]
             if res and res.itemsStatus then
@@ -441,6 +453,13 @@ function BPC.UpdateUI()
 
             mainFrame.infoBox.title:SetText(container.name)
             mainFrame.infoBox.sub:SetText(string.format("|cffffcc00Vendor:|r %s  |cffffcc00Cost:|r %s", container.vendor, container.cost))
+
+            local pricing = BPC.GetContainerPricing and BPC.GetContainerPricing(container)
+            if pricing and pricing.ev > 0 then
+                mainFrame.infoBox.pricing:SetText(string.format("|cffffcc00Expected Value:|r %s / pouch", BPC.FormatMoney(pricing.ev)))
+            else
+                mainFrame.infoBox.pricing:SetText("|cff888888AH Pricing: Scan with Auctionator|r")
+            end
 
             for _, entry in ipairs(res.itemsStatus) do
                 table.insert(itemsToDisplay, {
@@ -504,14 +523,19 @@ function BPC.UpdateUI()
 
             local nameText = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
             nameText:SetPoint("LEFT", icon, "RIGHT", 8, 0)
-            nameText:SetPoint("RIGHT", row, "RIGHT", -150, 0)
+            nameText:SetPoint("RIGHT", row, "RIGHT", -210, 0)
             nameText:SetJustifyH("LEFT")
             row.nameText = nameText
 
             local slotText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-            slotText:SetPoint("RIGHT", row, "RIGHT", -80, 0)
+            slotText:SetPoint("RIGHT", row, "RIGHT", -140, 0)
             slotText:SetJustifyH("RIGHT")
             row.slotText = slotText
+
+            local priceText = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            priceText:SetPoint("RIGHT", row, "RIGHT", -75, 0)
+            priceText:SetJustifyH("RIGHT")
+            row.priceText = priceText
 
             local statusText = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
             statusText:SetPoint("RIGHT", row, "RIGHT", -6, 0)
@@ -595,6 +619,12 @@ function BPC.UpdateUI()
                     GameTooltip:SetOwner(s, "ANCHOR_RIGHT")
                     GameTooltip:SetItemByID(s.itemID)
                     GameTooltip:AddLine(" ")
+
+                    local itemPrice = BPC.GetItemAHPrice and BPC.GetItemAHPrice(s.itemID)
+                    if itemPrice and itemPrice > 0 then
+                        GameTooltip:AddDoubleLine("AH Market Price:", BPC.FormatMoney(itemPrice))
+                    end
+
                     GameTooltip:AddLine("|cff00ccffCtrl-Click|r preview  |  |cff00ccffShift-Click|r AH search / Chat link", 0.5, 0.8, 1)
                     GameTooltip:Show()
                 else
@@ -634,6 +664,14 @@ function BPC.UpdateUI()
 
         -- Slot
         row.slotText:SetText(string.format("|cff888888%s|r", entry.item.slot or ""))
+
+        -- Price column
+        local itemPrice = BPC.GetItemAHPrice and BPC.GetItemAHPrice(entry.item.itemID)
+        if itemPrice and itemPrice > 0 then
+            row.priceText:SetText(BPC.FormatMoney(itemPrice))
+        else
+            row.priceText:SetText("|cff666666-|r")
+        end
 
         -- Status
         if entry.isCollected then

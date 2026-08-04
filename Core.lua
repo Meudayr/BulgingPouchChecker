@@ -339,7 +339,6 @@ frame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" and arg1 == addonName then
         if not BulgingPouchCheckerDB then BulgingPouchCheckerDB = {} end
         if BPC.CreateUI then BPC.CreateUI() end
-        print("|cff00ccff[Bulging Pouch Checker]|r v1.1.7 loaded. Type |cffffcc00/bpc|r to open.")
     elseif event == "TRANSMOG_COLLECTION_UPDATED" then
         if BPC.UpdateUI and BulgingPouchCheckerFrame and BulgingPouchCheckerFrame:IsShown() then
             BPC.UpdateUI()

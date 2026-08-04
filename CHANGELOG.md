@@ -1,6 +1,4 @@
-# Bulging Pouch Checker v1.4.0 Release Notes
+v1.4.1
 
-- **Pouch Expected Value**: Header now displays the calculated Expected Value (EV) per pouch opened based on Auctionator/TSM auction house price data.
-- **AH Price Column**: Added a price column to the item list displaying the current market price for each individual cosmetic item.
-- **Tooltip Pricing Integration**: Pouch tooltips in bags and at vendors now display the calculated Expected Value per pouch opened.
-- **Pricing Data Fallback**: Supports Auctionator API and database queries, with fallback to TSM market pricing data if present.
+*   Updated TOC version for Patch 12.1.0 compatibility.
+*   Removed startup chat load message.

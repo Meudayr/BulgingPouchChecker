@@ -90,14 +90,6 @@ BPC.Containers = {
             { itemID = 271031, sourceID = 306336, name = "Onyx Bloodknight Stave", slot = "Staff", quality = 3, icon = 135208 },
             { itemID = 271038, sourceID = 306343, name = "Ornate Blade of the Royal Guard", slot = "One-Handed Sword", quality = 3, icon = 135296 },
             { itemID = 271045, sourceID = 306350, name = "Crystal Focus Spellslinger", slot = "Wand", quality = 3, icon = 135487 },
-            { itemID = 271054, sourceID = 306359, name = "Sunlit Petalweave Crown", slot = "Head", quality = 3, icon = 7739694 },
-            { itemID = 271055, sourceID = 306360, name = "Sunlit Petalweave Mantle", slot = "Shoulder", quality = 3, icon = 7739698 },
-            { itemID = 271056, sourceID = 306361, name = "Sunlit Petalweave Halter", slot = "Chest", quality = 3, icon = 7739692 },
-            { itemID = 271057, sourceID = 306362, name = "Sunlit Petalweave Belt", slot = "Waist", quality = 3, icon = 7739686 },
-            { itemID = 271058, sourceID = 306363, name = "Sunlit Petalweave Skirt", slot = "Legs", quality = 3, icon = 7739697 },
-            { itemID = 271059, sourceID = 306364, name = "Sunlit Petalweave Boots", slot = "Feet", quality = 3, icon = 7739688 },
-            { itemID = 271060, sourceID = 306365, name = "Sunlit Petalweave Gloves", slot = "Hands", quality = 3, icon = 7739693 },
-            { itemID = 271061, sourceID = 306366, name = "Sunlit Petalweave Cloak", slot = "Back", quality = 3, icon = 7739690 },
         }
     },
     {

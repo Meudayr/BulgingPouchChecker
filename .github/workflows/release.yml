@@ -16,7 +16,5 @@ jobs:
 
       - name: Package and Release to CurseForge
         uses: BigWigsMods/packager@v2
-        with:
-          args: -c CHANGELOG.md
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}

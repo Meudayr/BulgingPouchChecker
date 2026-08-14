@@ -9,6 +9,8 @@ BPC.Containers = {
         coords = "/way 48.19, 49.20",
         cost = "150 Dark Particles",
         items = {
+            { itemID = 270993, sourceID = nil, name = "Twilight Blade Barrier", slot = "Shield", quality = 3, icon = 134400 },
+            { itemID = 271033, sourceID = 306338, name = "Skull-Bearer's Ritual Stave", slot = "Staff", quality = 3, icon = 370252 },
             { itemID = 271000, sourceID = 306305, name = "Twilight Gut Ripper", slot = "One-Handed Axe", quality = 3, icon = 1060561 },
             { itemID = 271002, sourceID = 306307, name = "Twilight Berserker's Cleaver", slot = "Two-Handed Axe", quality = 3, icon = 371395 },
             { itemID = 271007, sourceID = 306312, name = "Twilight Ritualist's Stiletto", slot = "Dagger", quality = 3, icon = 460715 },
@@ -64,12 +66,15 @@ BPC.Containers = {
             { itemID = 271021, sourceID = 306326, name = "Loa Battle Font", slot = "One-Handed Mace", quality = 3, icon = 133512 },
             { itemID = 271028, sourceID = 306333, name = "Amani War Spear", slot = "Polearm", quality = 3, icon = 7389536 },
             { itemID = 271032, sourceID = 306337, name = "Tiki-Bearer's Ritual Staff", slot = "Staff", quality = 3, icon = 135145 },
-            { itemID = 271033, sourceID = 306338, name = "Skull-Bearer's Ritual Stave", slot = "Staff", quality = 3, icon = 370252 },
             { itemID = 271036, sourceID = 306341, name = "Forest Shaman's Voodoo Staff", slot = "Staff", quality = 3, icon = 7389592 },
             { itemID = 271037, sourceID = 306342, name = "Battle Shaman's Ritual Staff", slot = "Staff", quality = 3, icon = 6989931 },
             { itemID = 271039, sourceID = 306344, name = "Curved Blade of the Drained Loa", slot = "One-Handed Sword", quality = 3, icon = 135403 },
             { itemID = 271046, sourceID = 306351, name = "Voodoo Hex Stick", slot = "Wand", quality = 3, icon = 135485 },
             { itemID = 271050, sourceID = 306355, name = "Forest Hunter's Quiver", slot = "Held In Off-Hand", quality = 3, icon = 7389582 },
+            { itemID = 270998, sourceID = nil, name = "Fetish of the Vanquished Foe", slot = "Held In Off-Hand", quality = 3, icon = 134400 },
+            { itemID = 270992, sourceID = nil, name = "Amani Hex Crest", slot = "Shield", quality = 3, icon = 134400 },
+            { itemID = 270996, sourceID = nil, name = "Hex-Horn Buckler", slot = "Shield", quality = 3, icon = 134400 },
+            { itemID = 270999, sourceID = nil, name = "Forest Berserker's Hatchet", slot = "One-Handed Axe", quality = 3, icon = 134400 },
         }
     },
     {
@@ -90,6 +95,10 @@ BPC.Containers = {
             { itemID = 271031, sourceID = 306336, name = "Onyx Bloodknight Stave", slot = "Staff", quality = 3, icon = 135208 },
             { itemID = 271038, sourceID = 306343, name = "Ornate Blade of the Royal Guard", slot = "One-Handed Sword", quality = 3, icon = 135296 },
             { itemID = 271045, sourceID = 306350, name = "Crystal Focus Spellslinger", slot = "Wand", quality = 3, icon = 135487 },
+            { itemID = 270997, sourceID = nil, name = "Blood Oath Tome", slot = "Held In Off-Hand", quality = 3, icon = 134400 },
+            { itemID = 270991, sourceID = nil, name = "Sunfury Great Bulwark", slot = "Shield", quality = 3, icon = 134400 },
+            { itemID = 270995, sourceID = nil, name = "Sin'dorei Crystal Focus", slot = "Held In Off-Hand", quality = 3, icon = 134400 },
+            { itemID = 272144, sourceID = nil, name = "Onyx Bloodknight Bladestaff", slot = "Polearm", quality = 3, icon = 134400 },
         }
     },
     {

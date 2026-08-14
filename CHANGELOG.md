@@ -1,3 +1,4 @@
-v1.4.4
+v1.4.5
 
-*   Removed Sunlit Petalweave armor set from the Bulging Elven Field Pouch database.
+*   Fixed an issue where 9 items were missing from the Twilight, Amani, and Elven field pouches.
+*   Moved Skull-Bearer's Ritual Stave to the correct Twilight Pouch.

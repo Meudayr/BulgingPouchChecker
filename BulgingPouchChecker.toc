@@ -1,9 +1,9 @@
-## Interface: 120001, 120005, 120007, 120100
+## Interface: 120001, 120005, 120007, 120100, 120105
 ## Title: |cff00ccffBulging Pouch Checker|r
 ## X-Curse-Project-ID: 1619494
 ## Notes: Analyzes transmog completion for 12.0.7 Field Pouches and Packs (Twilight, Naga, Amani, Elven, Winter, Ethereal)
 ## Author: Antigravity
-## Version: 1.4.6
+## Version: 1.4.7
 ## IconTexture: Interface\AddOns\BulgingPouchChecker\icon.png
 ## AddonCompartmentFunc: BULGINGPOUCHCHECKER_OnCompartmentClick
 ## SavedVariables: BulgingPouchCheckerDB
